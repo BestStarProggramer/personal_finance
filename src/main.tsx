@@ -8,8 +8,8 @@ import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <ThemeProvider theme={theme} defaultMode="light" disableTransitionOnChange>
+      <CssBaseline enableColorScheme />
       <BrowserRouter>
         <App />
       </BrowserRouter>

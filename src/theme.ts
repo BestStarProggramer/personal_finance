@@ -1,11 +1,19 @@
 import { createTheme } from '@mui/material/styles'
 
 const theme = createTheme({
-  palette: {
-    primary: { main: '#22634e' },
-    background: { default: '#f3f6f3', paper: '#ffffff' },
-    text: { primary: '#21352b', secondary: '#53635b' },
-    divider: '#dce5df',
+  colorSchemes: {
+    light: { palette: {
+      primary: { main: '#22634e' },
+      background: { default: '#f3f6f3', paper: '#ffffff' },
+      text: { primary: '#21352b', secondary: '#53635b' },
+      divider: '#dce5df',
+    } },
+    dark: { palette: {
+      primary: { main: '#90d4b4', contrastText: '#10291e' },
+      background: { default: '#101a16', paper: '#192720' },
+      text: { primary: '#ecf5ef', secondary: '#b3c6ba' },
+      divider: '#3a5043',
+    } },
   },
   typography: {
     fontFamily: "system-ui, 'Segoe UI', sans-serif",
