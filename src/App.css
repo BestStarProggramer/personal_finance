@@ -1,18 +1,14 @@
-﻿.app-layout { max-width: 1120px; margin: 0 auto; padding: 32px 24px; }
-.app-header { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 40px; }
-.app-brand { margin: 0; color: #183c34; font-size: 22px; font-weight: 700; }
-.app-header nav { display: flex; flex-wrap: wrap; gap: 8px; }
-.app-header nav a { padding: 10px 14px; border-radius: 8px; color: #46564f; text-decoration: none; }
-.app-header nav a:hover { background: #e6ede8; }
-.app-header nav a.active { background: #183c34; color: #fff; }
-.page-card { padding: 32px; border: 1px solid #dce5df; border-radius: 16px; background: #fff; }
-.page-card h1 { margin: 0 0 16px; font-size: clamp(26px, 4vw, 36px); line-height: 1.2; }
-.page-card p { margin: 0; color: #53635b; }
-.page-actions { margin-top: 24px; }
-.skip-link { position: absolute; top: -100px; padding: 12px; background: #fff; }
-.skip-link:focus { top: 8px; }
-@media (max-width: 640px) {
-  .app-layout { padding: 24px 16px; }
-  .app-header { align-items: flex-start; flex-direction: column; gap: 16px; margin-bottom: 24px; }
-  .page-card { padding: 24px; }
+﻿.skip-link {
+  position: absolute;
+  top: -100px;
+  padding: 12px;
+  background: #fff;
+  color: #22634e;
+  z-index: 1;
+}
+
+.skip-link:focus {
+  top: 8px;
+  outline: 3px solid #22634e;
+  outline-offset: 3px;
 }

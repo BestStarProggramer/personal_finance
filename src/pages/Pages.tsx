@@ -1,10 +1,11 @@
 import { Link } from 'react-router'
+import { Button } from '@mui/material'
 import PagePlaceholder from '../components/PagePlaceholder'
 
 export function OverviewPage() {
   return (
     <PagePlaceholder title="Обзор" description="Здесь появятся доходы, расходы и итоги за выбранный месяц.">
-      <Link to="/transactions">Перейти к операциям →</Link>
+      <Button component={Link} to="/transactions" variant="contained">Перейти к операциям →</Button>
     </PagePlaceholder>
   )
 }
@@ -12,7 +13,7 @@ export function OverviewPage() {
 export function TransactionsPage() {
   return (
     <PagePlaceholder title="Операции" description="Здесь появится список доходов и расходов с фильтрами.">
-      <Link to="/transactions/new">Добавить операцию →</Link>
+      <Button component={Link} to="/transactions/new" variant="contained">Добавить операцию →</Button>
     </PagePlaceholder>
   )
 }
@@ -20,7 +21,7 @@ export function TransactionsPage() {
 export function NewTransactionPage() {
   return (
     <PagePlaceholder title="Новая операция" description="Здесь будет форма для ввода суммы, типа, категории и даты операции.">
-      <Link to="/transactions">← Вернуться к операциям</Link>
+      <Button component={Link} to="/transactions" variant="outlined">← Вернуться к операциям</Button>
     </PagePlaceholder>
   )
 }
@@ -36,7 +37,7 @@ export function SettingsPage() {
 export function NotFoundPage() {
   return (
     <PagePlaceholder title="Страница не найдена" description="Проверьте адрес или вернитесь на главную страницу.">
-      <Link to="/">Открыть обзор →</Link>
+      <Button component={Link} to="/" variant="contained">Открыть обзор →</Button>
     </PagePlaceholder>
   )
 }

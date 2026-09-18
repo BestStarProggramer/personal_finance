@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Box, Paper, Typography } from '@mui/material'
 
 type PagePlaceholderProps = {
   title: string
@@ -8,10 +9,10 @@ type PagePlaceholderProps = {
 
 export default function PagePlaceholder({ title, description, children }: PagePlaceholderProps) {
   return (
-    <section className="page-card">
-      <h1>{title}</h1>
-      <p>{description}</p>
-      {children && <div className="page-actions">{children}</div>}
-    </section>
+    <Paper component="section" variant="outlined" sx={{ p: { xs: 3, sm: 4 } }}>
+      <Typography variant="h1" gutterBottom>{title}</Typography>
+      <Typography color="text.secondary" sx={{ maxWidth: 640 }}>{description}</Typography>
+      {children && <Box sx={{ mt: 3 }}>{children}</Box>}
+    </Paper>
   )
 }

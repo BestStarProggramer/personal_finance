@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router'
+import { Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
 
 const navigation = [
   { to: '/', label: 'Обзор' },
@@ -9,19 +10,37 @@ const navigation = [
 
 export default function AppLayout() {
   return (
-    <div className="app-layout">
+    <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 4 } }}>
       <a className="skip-link" href="#main-content">Перейти к содержимому</a>
-      <header className="app-header">
-        <p className="app-brand">Личный бюджет</p>
-        <nav aria-label="Основная навигация">
-          {navigation.map(({ to, label }) => (
-            <NavLink key={to} to={to} end={to === '/'}>{label}</NavLink>
-          ))}
-        </nav>
-      </header>
-      <main id="main-content" tabIndex={-1}>
+      <Paper component="header" variant="outlined" sx={{ p: { xs: 2, sm: 3 }, mb: 3 }}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={3} sx={{ alignItems: { md: 'center' }, justifyContent: 'space-between' }}>
+          <Box>
+            <Typography component="p" variant="h6" sx={{ fontWeight: 700 }}>Личный бюджет</Typography>
+            <Typography variant="body2" color="text.secondary">Доходы, расходы и планы</Typography>
+          </Box>
+          <Box component="nav" aria-label="Основная навигация" sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {navigation.map(({ to, label }) => (
+              <Button
+                key={to}
+                component={NavLink}
+                to={to}
+                end={to === '/'}
+                sx={{
+                  color: 'text.secondary',
+                  px: 2,
+                  '&.active': { bgcolor: 'primary.main', color: 'primary.contrastText' },
+                  '&.active:hover': { bgcolor: 'primary.dark' },
+                }}
+              >
+                {label}
+              </Button>
+            ))}
+          </Box>
+        </Stack>
+      </Paper>
+      <Box component="main" id="main-content" tabIndex={-1}>
         <Outlet />
-      </main>
-    </div>
+      </Box>
+    </Container>
   )
 }
