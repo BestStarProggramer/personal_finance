@@ -92,5 +92,9 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual(caught.exception.orig.sqlstate, "23001")
 
 
+def tearDownModule() -> None:
+    get_engine().dispose()
+
+
 if __name__ == "__main__":
     unittest.main()
