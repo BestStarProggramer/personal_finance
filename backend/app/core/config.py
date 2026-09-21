@@ -1,7 +1,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +15,11 @@ class Settings(BaseSettings):
 
     app_name: str = Field(default="Personal Finance API", min_length=1)
     debug: bool = False
+    db_host: str = "127.0.0.1"
+    db_port: int = Field(default=5432, ge=1, le=65535)
+    db_name: str = "personal_finance"
+    db_user: str = "finance_app"
+    db_password: SecretStr = SecretStr("")
 
 
 @lru_cache
