@@ -1,7 +1,10 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { filterTransactions, parseAmount, validateTransaction } from '../src/data/transactions.ts'
-import type { Transaction, TransactionDraft } from '../src/data/transactions.ts'
+import { filterTransactions } from '../src/entities/finance/model/filter.ts'
+import { parseAmount } from '../src/shared/lib/money.ts'
+import { validateTransaction } from '../src/features/create-transaction/validation.ts'
+import type { TransactionDraft } from '../src/features/create-transaction/validation.ts'
+import type { Transaction } from '../src/entities/finance/model/types.ts'
 
 test('суммы с запятой и точкой переводятся в целые копейки', () => {
   assert.equal(parseAmount(' 1250,50 '), 125050)
@@ -33,7 +36,7 @@ test('фильтры сочетаются, границы месяца учит�
     { ...base, id: 'c', date: '2026-10-01' },
     { ...base, id: 'd', type: 'income', category: 'Зарплата' },
   ]
-  const filters = { month: '2026-09', type: 'expense', category: 'Продукты' }
+  const filters = { month: '2026-09', type: 'expense' as const, category: 'Продукты' }
   assert.deepEqual(filterTransactions(records, filters).map((item) => item.id), ['b', 'a'])
   assert.equal(filterTransactions(records, { ...filters, month: '2025-01' }).length, 0)
   assert.equal(filterTransactions(records, { month: '', type: '', category: '' }).length, 4)

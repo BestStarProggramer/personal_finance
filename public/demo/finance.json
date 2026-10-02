@@ -1,0 +1,16 @@
+{
+  "transactions": [
+    { "id": "demo-1", "type": "income", "amountKopecks": 8500000, "category": "Зарплата", "date": { "monthOffset": 0, "day": 1 }, "comment": "Зарплата за месяц" },
+    { "id": "demo-2", "type": "expense", "amountKopecks": 325050, "category": "Продукты", "date": { "monthOffset": 0, "day": "today" }, "comment": "Покупки на неделю" },
+    { "id": "demo-3", "type": "expense", "amountKopecks": 2500000, "category": "Жильё", "date": { "monthOffset": 0, "day": 1 }, "comment": "Аренда" },
+    { "id": "demo-4", "type": "expense", "amountKopecks": 6500, "category": "Транспорт", "date": { "monthOffset": 0, "day": "today" }, "comment": "Поездка на метро" },
+    { "id": "demo-5", "type": "income", "amountKopecks": 1200000, "category": "Подработка", "date": { "monthOffset": -1, "day": 20 }, "comment": "Разовый проект" },
+    { "id": "demo-6", "type": "expense", "amountKopecks": 180000, "category": "Развлечения", "date": { "monthOffset": -1, "day": 25 }, "comment": "Кино" }
+  ],
+  "budgets": [
+    { "category": "Продукты", "monthOffset": 0, "amountKopecks": 1500000 },
+    { "category": "Транспорт", "monthOffset": 0, "amountKopecks": 300000 },
+    { "category": "Жильё", "monthOffset": 0, "amountKopecks": 2500000 },
+    { "category": "Развлечения", "monthOffset": 0, "amountKopecks": 500000 }
+  ]
+}

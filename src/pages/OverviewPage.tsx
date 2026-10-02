@@ -1,24 +1,41 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { Alert, Box, Button, LinearProgress, Paper, Stack, TextField, Typography } from '@mui/material'
-import { formatDate, formatMoney, localDate } from '../data/transactions'
-import type { Transaction } from '../data/transactions'
-import { summarizeMonth } from '../data/summary'
+import { formatDate, localDate } from '../shared/lib/date'
+import { formatMoney } from '../shared/lib/money'
+import type { Transaction } from '../entities/finance/model/types'
+import { summarizeMonth } from '../entities/finance/model/summary'
+import { useFinance } from '../entities/finance/model/use-finance'
+import AsyncContent from '../shared/ui/AsyncContent'
+import EmptyState from '../shared/ui/EmptyState'
 
-export default function OverviewPage({ transactions }: { transactions: Transaction[] }) {
+export default function OverviewPage() {
+  const { state, retry } = useFinance()
   const [month, setMonth] = useState(() => localDate().slice(0, 7))
-  const summary = summarizeMonth(transactions, month)
   return (
     <Stack spacing={3}>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ justifyContent: 'space-between' }}>
         <Box><Typography variant="h1">Обзор</Typography><Typography color="text.secondary">Ваши финансы за выбранный месяц</Typography></Box>
         <TextField id="overview-month" label="Месяц" type="month" value={month} slotProps={{ inputLabel: { shrink: true } }} onChange={(event) => { if (event.target.value) setMonth(event.target.value) }} />
       </Stack>
+      <AsyncContent state={state} onRetry={retry}>
+        {({ transactions }) => <OverviewSummary transactions={transactions} month={month} />}
+      </AsyncContent>
+    </Stack>
+  )
+}
+
+function OverviewSummary({ transactions, month }: { transactions: Transaction[]; month: string }) {
+  const summary = summarizeMonth(transactions, month)
+  return (
+    <Stack spacing={3}>
+      {!summary.records.length && <EmptyState title="Операций за этот месяц нет" description="Добавьте доход или расход, чтобы увидеть итоги и распределение расходов."
+        action={<Button component={Link} to="/transactions/new" variant="contained">Добавить операцию</Button>} />}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' }, gap: 2 }}>
-        {[['Доходы', summary.income], ['Расходы', summary.expense], ['Разница за месяц', summary.balance]].map(([label, value]) => (
+        {([{ label: 'Доходы', value: summary.income }, { label: 'Расходы', value: summary.expense }, { label: 'Разница за месяц', value: summary.balance }]).map(({ label, value }) => (
           <Paper variant="outlined" key={label} sx={{ p: 3, minWidth: 0 }}>
             <Typography color="text.secondary">{label}</Typography>
-            <Typography data-testid={label === 'Расходы' ? 'expense-total' : undefined} sx={{ fontSize: 'clamp(1.3rem, 3vw, 1.8rem)', fontWeight: 700, overflowWrap: 'anywhere', mt: 1 }}>{formatMoney(Number(value))}</Typography>
+            <Typography data-testid={label === 'Расходы' ? 'expense-total' : undefined} sx={{ fontSize: 'clamp(1.3rem, 3vw, 1.8rem)', fontWeight: 700, overflowWrap: 'anywhere', mt: 1 }}>{formatMoney(value)}</Typography>
           </Paper>
         ))}
       </Box>

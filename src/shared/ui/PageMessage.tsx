@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react'
 import { Box, Paper, Typography } from '@mui/material'
 
-type PagePlaceholderProps = {
+type PageMessageProps = {
   title: string
   description: string
   children?: ReactNode
 }
 
-export default function PagePlaceholder({ title, description, children }: PagePlaceholderProps) {
+export default function PageMessage({ title, description, children }: PageMessageProps) {
   return (
     <Paper component="section" variant="outlined" sx={{ p: { xs: 3, sm: 4 } }}>
       <Typography variant="h1" gutterBottom>{title}</Typography>

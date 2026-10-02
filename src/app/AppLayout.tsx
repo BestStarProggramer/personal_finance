@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router'
+import { useEffect, useRef } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router'
 import { Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
 
 const navigation = [
@@ -9,6 +10,16 @@ const navigation = [
 ]
 
 export default function AppLayout() {
+  const { pathname } = useLocation()
+  const main = useRef<HTMLElement | null>(null)
+  const previousPath = useRef(pathname)
+  useEffect(() => {
+    if (previousPath.current !== pathname) {
+      main.current?.focus({ preventScroll: true })
+      window.scrollTo({ top: 0 })
+      previousPath.current = pathname
+    }
+  }, [pathname])
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 4 } }}>
       <a className="skip-link" href="#main-content">Перейти к содержимому</a>
@@ -38,8 +49,8 @@ export default function AppLayout() {
           </Box>
         </Stack>
       </Paper>
-      <Box component="main" id="main-content" tabIndex={-1}>
-        <Outlet />
+      <Box component="main" id="main-content" tabIndex={-1} ref={main} sx={{ outline: 'none' }}>
+        <Box key={pathname} className="route-transition"><Outlet /></Box>
       </Box>
     </Container>
   )

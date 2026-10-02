@@ -1,7 +1,7 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { summarizeMonth } from '../src/data/summary.ts'
-import type { Transaction } from '../src/data/transactions.ts'
+import { summarizeMonth } from '../src/entities/finance/model/summary.ts'
+import type { Transaction } from '../src/entities/finance/model/types.ts'
 
 test('итоги учитывают тип, месяц и точные суммы по категориям', () => {
   const records: Transaction[] = [

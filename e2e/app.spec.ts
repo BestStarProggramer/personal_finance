@@ -74,6 +74,7 @@ test('все экраны без переполнения на телефоне 
     for (const [path, name, title] of screens) {
       await page.goto(path)
       await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible()
+      await expect(page.getByRole('status', { name: 'Загрузка данных' })).toHaveCount(0)
       await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
       await page.screenshot({ path: `docs/screenshots/${name}${width === 320 ? '-mobile' : ''}.png`, fullPage: true, animations: 'disabled' })
     }
@@ -85,6 +86,7 @@ test('все экраны без переполнения на телефоне 
   await page.screenshot({ path: 'docs/screenshots/settings-dark.png', fullPage: true })
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'Обзор', exact: true })).toBeVisible()
+  await expect(page.getByTestId('expense-total')).toBeVisible()
   await page.screenshot({ path: 'docs/screenshots/overview-dark.png', fullPage: true })
   expect(errors).toEqual([])
 })

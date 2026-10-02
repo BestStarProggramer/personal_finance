@@ -1,11 +1,6 @@
-import { categories, filterTransactions, localDate } from './transactions.ts'
-import type { Transaction } from './transactions.ts'
-
-export type Budgets = Record<string, Record<string, number>>
-
-export function createDemoBudgets(): Budgets {
-  return { [localDate().slice(0, 7)]: { Продукты: 1500000, Транспорт: 300000, Жильё: 2500000, Развлечения: 500000 } }
-}
+import { categories } from './types.ts'
+import type { Transaction } from './types.ts'
+import { filterTransactions } from './filter.ts'
 
 export function summarizeMonth(transactions: Transaction[], month: string) {
   const records = filterTransactions(transactions, { month, type: '', category: '' })

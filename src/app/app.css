@@ -1,0 +1,30 @@
+﻿.skip-link {
+  position: absolute;
+  top: -100px;
+  padding: 12px;
+  background: #fff;
+  color: #22634e;
+  z-index: 1;
+}
+
+.skip-link:focus {
+  top: 8px;
+  outline: 3px solid #22634e;
+  outline-offset: 3px;
+}
+
+.route-transition { animation: page-enter 180ms ease-out; }
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-transition { animation: none; }
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
