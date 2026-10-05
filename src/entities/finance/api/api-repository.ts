@@ -45,6 +45,14 @@ export class ApiFinanceRepository implements FinanceRepository {
     return this.data
   }
 
+  async addCategory(input: Omit<Category, 'id'>): Promise<FinanceData> {
+    if (!this.data) throw new Error('Дождитесь загрузки данных.')
+    const category = await apiClient.request<Category>('/categories', { method: 'POST', json: input })
+    this.revision++
+    this.data = { ...this.data, categories: [...this.data.categories, category] }
+    return this.data
+  }
+
   async addTransaction(transaction: NewTransaction): Promise<FinanceData> {
     const category = this.data?.categories.find((item) => item.type === transaction.type && item.name === transaction.category)
     if (!this.data || !category) throw new Error('Выберите доступную категорию операции.')

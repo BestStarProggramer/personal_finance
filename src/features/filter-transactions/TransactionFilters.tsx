@@ -1,5 +1,6 @@
 import { Box, MenuItem, TextField } from '@mui/material'
 import type { Category, TransactionFilters as Filters, TransactionType } from '../../entities/finance/model/types'
+import DateFilter from '../../shared/ui/DateFilter'
 
 type Props = { categories: Category[]; value: Filters; onChange: (filters: Filters) => void }
 
@@ -7,8 +8,7 @@ export default function TransactionFilters({ categories, value, onChange }: Prop
   const availableCategories = categories.filter((item) => !value.type || item.type === value.type)
   return (
     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(3, minmax(0, 1fr))' }, gap: 2 }}>
-      <TextField id="filter-month" label="Месяц" type="month" value={value.month} slotProps={{ inputLabel: { shrink: true } }}
-        onChange={(event) => onChange({ ...value, month: event.target.value })} />
+      <DateFilter value={value.date ?? ''} onChange={(date) => onChange({ ...value, date, month: '' })} />
       <TextField id="filter-type" select label="Тип операции" value={value.type}
         onChange={(event) => onChange({ ...value, type: event.target.value as TransactionType | '', category: '' })}>
         <MenuItem value="">Все типы</MenuItem><MenuItem value="income">Доход</MenuItem><MenuItem value="expense">Расход</MenuItem>

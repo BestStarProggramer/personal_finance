@@ -1,5 +1,6 @@
 import { expect, test } from './fixtures.js'
 import type { Page } from '@playwright/test'
+import { chooseMonth } from './month-picker.js'
 
 async function capture(page: Page, name: string) {
   await page.emulateMedia({ reducedMotion: 'reduce' })
@@ -118,13 +119,14 @@ test('ошибки форм, смена типа операции, исправ�
   await expect(page.getByRole('status')).toHaveText('Найдено: 7')
 
   await page.getByRole('link', { name: 'Бюджеты', exact: true }).click()
-  await page.getByLabel('Месяц').fill('')
+  await page.getByRole('button', { name: 'Открыть календарь' }).click()
+  await page.getByRole('button', { name: 'Очистить', exact: true }).click()
   await page.getByLabel('Лимит, ₽').fill('-1')
   await page.getByRole('button', { name: 'Сохранить лимит' }).click()
   await expect(page.getByText('Укажите корректный месяц.')).toBeVisible()
   await expect(page.getByLabel('Лимит, ₽')).toHaveAttribute('aria-invalid', 'true')
   await capture(page, 'budgets-errors')
-  await page.getByLabel('Месяц').fill('2020-01')
+  await chooseMonth(page, '2020-01')
   await page.getByLabel('Лимит, ₽').fill('500')
   await page.getByRole('button', { name: 'Сохранить лимит' }).click()
   await expect(page.getByRole('button', { name: 'Сохранить лимит' })).toBeDisabled()
@@ -132,7 +134,7 @@ test('ошибки форм, смена типа операции, исправ�
   await expect(page.getByText('Лимит сохранён.')).toBeVisible()
   await expect(page.getByRole('region', { name: 'Продукты', exact: true })).toContainText('Лимит: 500,00')
   await capture(page, 'budgets-saved')
-  await page.getByLabel('Месяц').fill('2020-02')
+  await chooseMonth(page, '2020-02')
   await expect(page.getByText('Лимит сохранён.')).toHaveCount(0)
   await expect(page.getByText('Бюджеты на этот месяц не заданы')).toBeVisible()
 })

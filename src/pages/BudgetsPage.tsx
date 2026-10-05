@@ -16,7 +16,7 @@ export default function BudgetsPage() {
       <Box><Typography variant="h1">Бюджеты</Typography><Typography color="text.secondary">Месячные лимиты расходов по категориям</Typography></Box>
       <AsyncContent state={state} onRetry={retry}>
         {({ transactions, budgets, categories }) => <>
-          <BudgetEditor categories={categories.filter((item) => item.type === 'expense').map((item) => item.name)} month={month} onMonthChange={setMonth} onSave={saveBudget} />
+          <BudgetEditor categories={categories.filter((item) => item.type === 'expense').map((item) => item.name)} categoryRecords={categories} month={month} onMonthChange={setMonth} onSave={saveBudget} />
           {isValidMonth(month) && <>
             {!Object.keys(budgets[month] ?? {}).length && <EmptyState title="Бюджеты на этот месяц не заданы" description="Выберите категорию и сохраните лимит в форме выше. Расходы уже учитываются в карточках." />}
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' }, gap: 2 }}>

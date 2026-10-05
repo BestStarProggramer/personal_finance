@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { Alert, Box, Button, LinearProgress, Paper, Stack, TextField, Typography } from '@mui/material'
+import { Alert, AlertTitle, Box, Button, LinearProgress, Paper, Stack, Typography } from '@mui/material'
 import { formatDate, localDate } from '../shared/lib/date'
 import { formatMoney } from '../shared/lib/money'
 import type { Category, Transaction } from '../entities/finance/model/types'
 import { summarizeMonth } from '../entities/finance/model/summary'
 import { useFinance } from '../entities/finance/model/use-finance'
 import AsyncContent from '../shared/ui/AsyncContent'
-import EmptyState from '../shared/ui/EmptyState'
+import MonthPicker from '../shared/ui/MonthPicker'
 
 export default function OverviewPage() {
   const { state, retry } = useFinance()
@@ -16,7 +16,7 @@ export default function OverviewPage() {
     <Stack spacing={3}>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ justifyContent: 'space-between' }}>
         <Box><Typography variant="h1">Обзор</Typography><Typography color="text.secondary">Ваши финансы за выбранный месяц</Typography></Box>
-        <TextField id="overview-month" label="Месяц" type="month" value={month} slotProps={{ inputLabel: { shrink: true } }} onChange={(event) => { if (event.target.value) setMonth(event.target.value) }} />
+        <MonthPicker id="overview-month" value={month} onChange={setMonth} />
       </Stack>
       <AsyncContent state={state} onRetry={retry}>
         {({ transactions, categories }) => <OverviewSummary categories={categories} transactions={transactions} month={month} />}
@@ -29,8 +29,11 @@ function OverviewSummary({ transactions, month, categories }: { categories: Cate
   const summary = summarizeMonth(transactions, month, categories.filter((item) => item.type === 'expense').map((item) => item.name))
   return (
     <Stack spacing={3}>
-      {!summary.records.length && <EmptyState title="Операций за этот месяц нет" description="Добавьте доход или расход, чтобы увидеть итоги и распределение расходов."
-        action={<Button component={Link} to="/transactions/new" variant="contained">Добавить операцию</Button>} />}
+      {!summary.records.length && <Alert severity="info">
+        <AlertTitle>Операций за этот месяц нет</AlertTitle>
+        Добавьте доход или расход, чтобы увидеть итоги и распределение расходов.
+        <Box sx={{ mt: 2 }}><Button component={Link} to="/transactions/new" variant="contained">Добавить операцию</Button></Box>
+      </Alert>}
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' }, gap: 2 }}>
         {([{ label: 'Доходы', value: summary.income }, { label: 'Расходы', value: summary.expense }, { label: 'Разница за месяц', value: summary.balance }]).map(({ label, value }) => (
           <Paper variant="outlined" key={label} sx={{ p: 3, minWidth: 0 }}>
@@ -54,7 +57,7 @@ function OverviewSummary({ transactions, month, categories }: { categories: Cate
       </Paper>
       <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 } }}>
         <Typography variant="h6" component="h2" gutterBottom>Последние операции месяца</Typography>
-        {summary.records.length === 0 ? <Typography color="text.secondary">Операций за этот месяц нет.</Typography> : (
+        {summary.records.length === 0 ? <Alert severity="info">Операций за этот месяц нет.</Alert> : (
           <Stack component="ul" spacing={2} sx={{ listStyle: 'none', p: 0 }}>
             {summary.records.slice(0, 5).map((item) => (
               <Box component="li" key={item.id} sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>

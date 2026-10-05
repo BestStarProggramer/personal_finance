@@ -38,6 +38,9 @@ test('фильтры сочетаются, границы месяца учит�
   ]
   const filters = { month: '2026-09', type: 'expense' as const, category: 'Продукты' }
   assert.deepEqual(filterTransactions(records, filters).map((item) => item.id), ['b', 'a'])
+  assert.deepEqual(filterTransactions(records, { ...filters, date: '2026-09-01' }).map((item) => item.id), ['a'])
+  assert.equal(filterTransactions(records, { ...filters, date: '2026-09-02' }).length, 0)
+  assert.deepEqual(filterTransactions(records, { month: '', date: '2026-09-01', type: '', category: '' }).map((item) => item.id), ['a', 'd'])
   assert.equal(filterTransactions(records, { ...filters, month: '2025-01' }).length, 0)
   assert.equal(filterTransactions(records, { month: '', type: '', category: '' }).length, 4)
   assert.deepEqual(records.map((item) => item.id), ['a', 'b', 'c', 'd'])

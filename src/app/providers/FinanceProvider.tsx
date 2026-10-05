@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { ApiFinanceRepository } from '../../entities/finance/api/api-repository'
-import type { BudgetInput, FinanceData, NewTransaction } from '../../entities/finance/model/types'
+import type { BudgetInput, Category, FinanceData, NewTransaction } from '../../entities/finance/model/types'
 import type { AsyncState } from '../../shared/lib/async-state'
 import { FinanceContext } from '../../entities/finance/model/context'
 
@@ -31,6 +31,11 @@ export default function FinanceProvider({ children }: { children: ReactNode }) {
     load()
   }
 
+  async function addCategory(category: Omit<Category, 'id'>): Promise<void> {
+    const data = await repository.addCategory(category)
+    setState({ status: 'ready', data })
+  }
+
   async function addTransaction(transaction: NewTransaction): Promise<void> {
     const data = await repository.addTransaction(transaction)
     setState({ status: 'ready', data })
@@ -41,5 +46,5 @@ export default function FinanceProvider({ children }: { children: ReactNode }) {
     setState({ status: 'ready', data })
   }
 
-  return <FinanceContext value={{ state, retry, addTransaction, saveBudget }}>{children}</FinanceContext>
+  return <FinanceContext value={{ state, retry, addTransaction, addCategory, saveBudget }}>{children}</FinanceContext>
 }

@@ -1,5 +1,6 @@
 import { test, expect } from './fixtures.js'
 import { mkdir } from 'node:fs/promises'
+import { chooseMonth } from './month-picker.js'
 
 test('операция обновляет обзор и бюджет, лимиты разделены по месяцам', async ({ page }) => {
   const errors: string[] = []
@@ -22,10 +23,10 @@ test('операция обновляет обзор и бюджет, лимит
   await page.getByLabel('Лимит, ₽').fill('4000')
   await page.getByRole('button', { name: 'Сохранить лимит' }).click()
   await expect(food).toContainText('Превышение: 501,00')
-  const month = await page.getByLabel('Месяц').inputValue()
-  await page.getByLabel('Месяц').fill('2020-01')
+  const month = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Moscow' }).slice(0, 7)
+  await chooseMonth(page, '2020-01')
   await expect(food).toContainText('Лимит не задан')
-  await page.getByLabel('Месяц').fill(month)
+  await chooseMonth(page, month)
   await expect(food).toContainText('Превышение: 501,00')
   await page.reload()
   await expect(food).toContainText(/Лимит: 4\s?000,00/)
@@ -38,7 +39,11 @@ test('фильтры, отмена, история, прямые адреса и
   await page.getByLabel('Тип операции').click()
   await page.getByRole('option', { name: 'Доход', exact: true }).click()
   await expect(page.getByRole('status')).toHaveText('Найдено: 2')
-  await page.getByLabel('Месяц').fill('2020-01')
+  await page.getByLabel('Дата', { exact: true }).fill('2020-01-01')
+  await page.getByRole('button', { name: 'Открыть календарь' }).click()
+  await expect(page.getByRole('dialog', { name: 'Выбор даты' })).toContainText('январь 2020')
+  await page.getByRole('button', { name: 'четверг, 2 января 2020 г.' }).click()
+  await expect(page.getByLabel('Дата', { exact: true })).toHaveValue('2020-01-02')
   await expect(page.getByText('Операции не найдены.', { exact: false })).toBeVisible()
   await page.getByRole('button', { name: 'Сбросить фильтры' }).click()
   await expect(page.getByRole('status')).toHaveText('Найдено: 6')

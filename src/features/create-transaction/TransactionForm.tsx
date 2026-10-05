@@ -8,6 +8,7 @@ import { parseAmount } from '../../shared/lib/money'
 import { useAsyncAction } from '../../shared/lib/use-async-action'
 import { validateTransaction } from './validation'
 import type { TransactionDraft } from './validation'
+import CategoryCreator from '../create-category/CategoryCreator'
 
 type Props = { categories: Category[]; onSave: (transaction: NewTransaction) => Promise<void>; onSaved: () => void }
 
@@ -52,6 +53,7 @@ export default function TransactionForm({ categories, onSave, onSaved }: Props) 
           onChange={(event) => change({ category: event.target.value })} error={Boolean(errors.category)} helperText={errors.category} disabled={pending}>
           {categories.filter((item) => item.type === draft.type).map((category) => <MenuItem key={category.id} value={category.name}>{category.name}</MenuItem>)}
         </TextField>
+        <CategoryCreator categories={categories} type={draft.type} disabled={pending} onCreated={(category) => change({ category })} />
         <TextField id="transaction-date" required label="Дата" type="date" value={draft.date}
           slotProps={{ inputLabel: { shrink: true } }} onChange={(event) => change({ date: event.target.value })}
           error={Boolean(errors.date)} helperText={errors.date} />

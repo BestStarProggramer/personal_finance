@@ -9,7 +9,7 @@ import TransactionFilters from '../features/filter-transactions/TransactionFilte
 import AsyncContent from '../shared/ui/AsyncContent'
 import EmptyState from '../shared/ui/EmptyState'
 
-const emptyFilters: Filters = { month: '', type: '', category: '' }
+const emptyFilters: Filters = { month: '', date: '', type: '', category: '' }
 
 export default function TransactionsPage() {
   const { state, retry } = useFinance()

@@ -16,7 +16,7 @@ export type Transaction = {
 }
 
 export type NewTransaction = Omit<Transaction, 'id'>
-export type TransactionFilters = { month: string; type: TransactionType | ''; category: string }
+export type TransactionFilters = { month: string; date?: string; type: TransactionType | ''; category: string }
 export type Budgets = Record<string, Record<string, number>>
 export type FinanceData = { transactions: Transaction[]; budgets: Budgets; categories: Category[] }
 export type BudgetInput = { month: string; category: string; amountKopecks: number }

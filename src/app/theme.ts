@@ -22,6 +22,7 @@ const theme = createTheme({
   },
   shape: { borderRadius: 12 },
   components: {
+    MuiFormLabel: { styleOverrides: { asterisk: { display: 'none' } } },
     MuiSkeleton: { defaultProps: { animation: false } },
     MuiButton: {
       defaultProps: { disableElevation: true },
