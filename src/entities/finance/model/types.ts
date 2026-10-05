@@ -1,4 +1,5 @@
 export type TransactionType = 'income' | 'expense'
+export type Category = { id: string; name: string; type: TransactionType }
 
 export const categories: Record<TransactionType, readonly string[]> = {
   income: ['Зарплата', 'Подработка', 'Подарки'],
@@ -17,7 +18,7 @@ export type Transaction = {
 export type NewTransaction = Omit<Transaction, 'id'>
 export type TransactionFilters = { month: string; type: TransactionType | ''; category: string }
 export type Budgets = Record<string, Record<string, number>>
-export type FinanceData = { transactions: Transaction[]; budgets: Budgets }
+export type FinanceData = { transactions: Transaction[]; budgets: Budgets; categories: Category[] }
 export type BudgetInput = { month: string; category: string; amountKopecks: number }
 
 export interface FinanceRepository {

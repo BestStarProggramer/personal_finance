@@ -1,21 +1,20 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Alert, Box, Button, Collapse, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material'
-import { categories } from '../../entities/finance/model/types'
 import type { BudgetInput } from '../../entities/finance/model/types'
 import { parseAmount } from '../../shared/lib/money'
 import { useAsyncAction } from '../../shared/lib/use-async-action'
 import { validateBudget } from './validation'
 
-type Props = { month: string; onMonthChange: (month: string) => void; onSave: (budget: BudgetInput) => Promise<void> }
+type Props = { categories: string[]; month: string; onMonthChange: (month: string) => void; onSave: (budget: BudgetInput) => Promise<void> }
 
-export default function BudgetEditor({ month, onMonthChange, onSave }: Props) {
-  const [category, setCategory] = useState(categories.expense[0])
+export default function BudgetEditor({ categories, month, onMonthChange, onSave }: Props) {
+  const [category, setCategory] = useState(categories.includes('Продукты') ? 'Продукты' : categories[0] ?? '')
   const [amount, setAmount] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [saved, setSaved] = useState(false)
   const { pending, error, run, clearError } = useAsyncAction()
-  const errors = submitted ? validateBudget({ month, category, amount }) : {}
+  const errors = submitted ? validateBudget({ month, category, amount }, categories) : {}
 
   function edit() { setSaved(false); clearError() }
 
@@ -24,7 +23,7 @@ export default function BudgetEditor({ month, onMonthChange, onSave }: Props) {
     if (pending) return
     setSubmitted(true)
     setSaved(false)
-    const validation = validateBudget({ month, category, amount })
+    const validation = validateBudget({ month, category, amount }, categories)
     const parsed = parseAmount(amount)
     const firstError = Object.keys(validation)[0]
     if (firstError || parsed === null) { document.getElementById(`budget-${firstError}`)?.focus(); return }
@@ -44,7 +43,7 @@ export default function BudgetEditor({ month, onMonthChange, onSave }: Props) {
             onChange={(event) => { onMonthChange(event.target.value); edit() }} error={Boolean(errors.month)} helperText={errors.month} />
           <TextField id="budget-category" required select label="Категория" value={category} disabled={pending}
             onChange={(event) => { setCategory(event.target.value); edit() }} error={Boolean(errors.category)} helperText={errors.category}>
-            {categories.expense.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
+            {categories.map((item) => <MenuItem key={item} value={item}>{item}</MenuItem>)}
           </TextField>
           <TextField id="budget-amount" required label="Лимит, ₽" value={amount} slotProps={{ htmlInput: { inputMode: 'decimal' } }}
             onChange={(event) => { setAmount(event.target.value); edit() }} error={Boolean(errors.amount)}

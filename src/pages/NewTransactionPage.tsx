@@ -12,7 +12,7 @@ export default function NewTransactionPage() {
       <Typography variant="h1" gutterBottom>Новая операция</Typography>
       <Typography color="text.secondary" sx={{ mb: 3 }}>Запишите доход или расход. Сумма указывается в рублях.</Typography>
       <AsyncContent state={state} onRetry={retry}>
-        {() => <TransactionForm onSave={addTransaction} onSaved={() => navigate('/transactions', { replace: true })} />}
+        {({ categories }) => <TransactionForm categories={categories} onSave={addTransaction} onSaved={() => navigate('/transactions', { replace: true })} />}
       </AsyncContent>
     </Paper>
   )

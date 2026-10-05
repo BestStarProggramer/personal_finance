@@ -11,8 +11,8 @@ from app.schemas.transactions import TransactionWrite
 from app.services.categories import get_category
 
 
-def get_transaction(session: Session, transaction_id: UUID, lock: bool = False) -> Transaction:
-    statement = select(Transaction).where(Transaction.id == transaction_id)
+def get_transaction(session: Session, transaction_id: UUID, owner_id: UUID, lock: bool = False) -> Transaction:
+    statement = select(Transaction).join(Category).where(Transaction.id == transaction_id, Category.owner_id == owner_id)
     if lock:
         statement = statement.with_for_update()
     transaction = session.scalar(statement)
@@ -22,12 +22,12 @@ def get_transaction(session: Session, transaction_id: UUID, lock: bool = False) 
 
 
 def list_transactions(
-    session: Session, category_id: UUID | None, category_type: CategoryType | None,
+    session: Session, owner_id: UUID, category_id: UUID | None, category_type: CategoryType | None,
     date_from: date | None, date_to: date | None, limit: int, offset: int,
 ) -> list[Transaction]:
     if date_from is not None and date_to is not None and date_from > date_to:
         raise HTTPException(status_code=422, detail="Начало периода не может быть позже его конца.")
-    statement = select(Transaction).join(Category)
+    statement = select(Transaction).join(Category).where(Category.owner_id == owner_id)
     if category_id is not None:
         statement = statement.where(Transaction.category_id == category_id)
     if category_type is not None:
@@ -39,24 +39,24 @@ def list_transactions(
     return list(session.scalars(statement.order_by(Transaction.date.desc(), Transaction.id).limit(limit).offset(offset)))
 
 
-def create_transaction(session: Session, data: TransactionWrite) -> Transaction:
-    get_category(session, data.category_id, lock=True)
+def create_transaction(session: Session, data: TransactionWrite, owner_id: UUID) -> Transaction:
+    get_category(session, data.category_id, owner_id, lock=True)
     transaction = Transaction(**data.model_dump())
     session.add(transaction)
     session.commit()
     return transaction
 
 
-def update_transaction(session: Session, transaction_id: UUID, data: TransactionWrite) -> Transaction:
-    transaction = get_transaction(session, transaction_id, lock=True)
-    get_category(session, data.category_id, lock=True)
+def update_transaction(session: Session, transaction_id: UUID, data: TransactionWrite, owner_id: UUID) -> Transaction:
+    transaction = get_transaction(session, transaction_id, owner_id, lock=True)
+    get_category(session, data.category_id, owner_id, lock=True)
     for field, value in data.model_dump().items():
         setattr(transaction, field, value)
     session.commit()
     return transaction
 
 
-def delete_transaction(session: Session, transaction_id: UUID) -> None:
-    transaction = get_transaction(session, transaction_id, lock=True)
+def delete_transaction(session: Session, transaction_id: UUID, owner_id: UUID) -> None:
+    transaction = get_transaction(session, transaction_id, owner_id, lock=True)
     session.delete(transaction)
     session.commit()

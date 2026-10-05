@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from './fixtures.js'
 import { mkdir } from 'node:fs/promises'
 
 test('операция обновляет обзор и бюджет, лимиты разделены по месяцам', async ({ page }) => {
@@ -28,8 +28,8 @@ test('операция обновляет обзор и бюджет, лимит
   await page.getByLabel('Месяц').fill(month)
   await expect(food).toContainText('Превышение: 501,00')
   await page.reload()
-  await expect(food).toContainText(/Лимит: 15\s?000,00/)
-  await expect(food).toContainText(/Потрачено: 3\s?250,50/)
+  await expect(food).toContainText(/Лимит: 4\s?000,00/)
+  await expect(food).toContainText(/Потрачено: 4\s?501,00/)
   expect(errors).toEqual([])
 })
 

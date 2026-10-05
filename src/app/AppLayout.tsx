@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router'
 import { Box, Button, Container, Paper, Stack, Typography } from '@mui/material'
+import { useAuth } from '../entities/auth/model/use-auth'
+import LogoutButton from '../features/logout/LogoutButton'
 
 const navigation = [
   { to: '/', label: 'Обзор' },
@@ -10,6 +12,8 @@ const navigation = [
 ]
 
 export default function AppLayout() {
+  const { state: auth, logout } = useAuth()
+  const links = auth.status === 'authenticated' ? navigation : [{ to: '/login', label: 'Вход' }, { to: '/register', label: 'Регистрация' }, { to: '/settings', label: 'Настройки' }]
   const { pathname } = useLocation()
   const main = useRef<HTMLElement | null>(null)
   const previousPath = useRef(pathname)
@@ -30,7 +34,7 @@ export default function AppLayout() {
             <Typography variant="body2" color="text.secondary">Доходы, расходы и планы</Typography>
           </Box>
           <Box component="nav" aria-label="Основная навигация" sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {navigation.map(({ to, label }) => (
+            {links.map(({ to, label }) => (
               <Button
                 key={to}
                 component={NavLink}
@@ -47,6 +51,10 @@ export default function AppLayout() {
               </Button>
             ))}
           </Box>
+          {auth.status === 'authenticated' && <Stack spacing={1} sx={{ minWidth: 0, overflowWrap: 'anywhere' }}>
+            <Typography variant="body2">{auth.user.name}</Typography>
+            <LogoutButton onLogout={logout} />
+          </Stack>}
         </Stack>
       </Paper>
       <Box component="main" id="main-content" tabIndex={-1} ref={main} sx={{ outline: 'none' }}>

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { DemoFinanceRepository } from '../../entities/finance/api/demo-repository'
+import { ApiFinanceRepository } from '../../entities/finance/api/api-repository'
 import type { BudgetInput, FinanceData, NewTransaction } from '../../entities/finance/model/types'
 import type { AsyncState } from '../../shared/lib/async-state'
 import { FinanceContext } from '../../entities/finance/model/context'
 
 export default function FinanceProvider({ children }: { children: ReactNode }) {
-  const [repository] = useState(() => new DemoFinanceRepository())
+  const [repository] = useState(() => new ApiFinanceRepository())
   const [state, setState] = useState<AsyncState<FinanceData>>({ status: 'loading' })
   const request = useRef<AbortController | null>(null)
 
@@ -26,7 +26,7 @@ export default function FinanceProvider({ children }: { children: ReactNode }) {
   }, [load])
 
   function retry() {
-    if (state.status !== 'error') return
+    if (state.status === 'loading') return
     setState({ status: 'loading' })
     load()
   }

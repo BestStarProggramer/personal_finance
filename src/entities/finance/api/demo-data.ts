@@ -1,6 +1,6 @@
 import { isValidDate, localDate } from '../../../shared/lib/date.ts'
 import { categories } from '../model/types.ts'
-import type { FinanceData, NewTransaction, Transaction } from '../model/types.ts'
+import type { FinanceData, NewTransaction, Transaction, TransactionType } from '../model/types.ts'
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
@@ -49,5 +49,6 @@ export function parseDemoData(value: unknown, now = new Date()): FinanceData {
     if (budgets[month][item.category] !== undefined) throw new Error('Повторяющийся бюджет.')
     budgets[month][item.category] = item.amountKopecks
   }
-  return { transactions, budgets }
+  const demoCategories = (Object.keys(categories) as TransactionType[]).flatMap((type) => categories[type].map((name, index) => ({ id: `${type}-${index}`, name, type })))
+  return { transactions, budgets, categories: demoCategories }
 }

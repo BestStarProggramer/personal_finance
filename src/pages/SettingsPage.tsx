@@ -9,7 +9,7 @@ export default function SettingsPage() {
         <Typography color="text.secondary">Оформление приложения</Typography>
         <ThemeToggle />
         <Typography>Валюта учёта: российский рубль (₽).</Typography>
-        <Alert severity="info">Тема сохраняется в этом браузере. Операции и бюджеты используют демонстрационные данные и сбрасываются после обновления страницы.</Alert>
+        <Alert severity="info">Тема сохраняется в этом браузере. Операции и бюджеты хранятся в вашем аккаунте на сервере и доступны после повторного входа.</Alert>
       </Stack>
     </Paper>
   )

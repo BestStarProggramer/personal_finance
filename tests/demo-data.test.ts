@@ -11,7 +11,10 @@ test('демоданные разрешают относительные дат�
   assert.equal(data.transactions[1].date, '2027-01-02')
   assert.equal(data.transactions[4].date, '2026-12-20')
   assert.equal(data.budgets['2027-01'].Продукты, 1500000)
-  assert.deepEqual(parseDemoData({ transactions: [], budgets: [] }), { transactions: [], budgets: {} })
+  const empty = parseDemoData({ transactions: [], budgets: [] })
+  assert.deepEqual(empty.transactions, [])
+  assert.deepEqual(empty.budgets, {})
+  assert.equal(empty.categories.length, 8)
 })
 
 test('повреждённые демоданные отклоняются до показа интерфейса', () => {

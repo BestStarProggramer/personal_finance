@@ -14,11 +14,12 @@ class Category(Base):
     __table_args__ = (
         CheckConstraint("type IN ('income', 'expense')", name="valid_type"),
         CheckConstraint("length(btrim(name)) > 0", name="name_not_blank"),
-        UniqueConstraint("name", "type", name="uq_categories_name_type"),
+        UniqueConstraint("owner_id", "name", "type", name="uq_categories_owner_name_type"),
         UniqueConstraint("id", "type", name="uq_categories_id_type"),
     )
 
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4, server_default=text("gen_random_uuid()"))
+    owner_id: Mapped[UUID] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
     name: Mapped[str] = mapped_column(String(80))
     type: Mapped[str] = mapped_column(String(7))
     transactions: Mapped[list[Transaction]] = relationship(back_populates="category", passive_deletes="all")

@@ -23,6 +23,9 @@ class BudgetApiTests(unittest.TestCase):
         app.dependency_overrides[get_session] = test_session
         self.client = TestClient(app)
         self.addCleanup(self.client.close)
+        registered = self.client.post("/api/auth/register", json={"name": "Test", "email": f"test-{uuid4()}@example.com", "password": "TestPassword123"})
+        self.assertEqual(registered.status_code, 201, registered.text)
+        self.client.headers["Authorization"] = f"Bearer {registered.json()['access_token']}"
         self.category = self.create_category()
         self.data = {"category_id": self.category["id"], "month": "2026-09-01", "limit_kopecks": 500000}
 

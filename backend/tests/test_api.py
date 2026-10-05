@@ -27,6 +27,9 @@ class ApiTests(unittest.TestCase):
         self.app.dependency_overrides[get_session] = test_session
         self.client = TestClient(self.app)
         self.addCleanup(self.client.close)
+        registered = self.client.post("/api/auth/register", json={"name": "Test", "email": f"test-{uuid4()}@example.com", "password": "TestPassword123"})
+        self.assertEqual(registered.status_code, 201, registered.text)
+        self.client.headers["Authorization"] = f"Bearer {registered.json()['access_token']}"
 
     def create_category(self, category_type="expense") -> dict:
         data = {"name": f"API-{uuid4()}", "type": category_type}

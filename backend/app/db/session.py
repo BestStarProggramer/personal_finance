@@ -20,7 +20,7 @@ def get_database_url() -> URL:
 def get_engine() -> Engine:
     return create_engine(
         get_database_url(), pool_pre_ping=True, hide_parameters=True,
-        connect_args={"connect_timeout": 5},
+        connect_args={"connect_timeout": 5, "options": f"-csearch_path={get_settings().db_schema}"},
     )
 
 

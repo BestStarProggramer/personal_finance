@@ -2,21 +2,20 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router'
 import { Alert, Button, Collapse, MenuItem, Stack, TextField } from '@mui/material'
-import { categories } from '../../entities/finance/model/types'
-import type { NewTransaction, TransactionType } from '../../entities/finance/model/types'
+import type { Category, NewTransaction, TransactionType } from '../../entities/finance/model/types'
 import { localDate } from '../../shared/lib/date'
 import { parseAmount } from '../../shared/lib/money'
 import { useAsyncAction } from '../../shared/lib/use-async-action'
 import { validateTransaction } from './validation'
 import type { TransactionDraft } from './validation'
 
-type Props = { onSave: (transaction: NewTransaction) => Promise<void>; onSaved: () => void }
+type Props = { categories: Category[]; onSave: (transaction: NewTransaction) => Promise<void>; onSaved: () => void }
 
-export default function TransactionForm({ onSave, onSaved }: Props) {
+export default function TransactionForm({ categories, onSave, onSaved }: Props) {
   const [draft, setDraft] = useState<TransactionDraft>(() => ({ type: 'expense', amount: '', category: '', date: localDate(), comment: '' }))
   const [submitted, setSubmitted] = useState(false)
   const { pending, error, run, clearError } = useAsyncAction()
-  const errors = submitted ? validateTransaction(draft) : {}
+  const errors = submitted ? validateTransaction(draft, categories) : {}
 
   function change(patch: Partial<TransactionDraft>) {
     clearError()
@@ -27,7 +26,7 @@ export default function TransactionForm({ onSave, onSaved }: Props) {
     event.preventDefault()
     if (pending) return
     setSubmitted(true)
-    const validation = validateTransaction(draft)
+    const validation = validateTransaction(draft, categories)
     const amountKopecks = parseAmount(draft.amount)
     const firstError = Object.keys(validation)[0]
     if (firstError || amountKopecks === null) {
@@ -51,7 +50,7 @@ export default function TransactionForm({ onSave, onSaved }: Props) {
           error={Boolean(errors.amount)} helperText={errors.amount || 'Например: 1250,50'} />
         <TextField id="transaction-category" select required label="Категория" value={draft.category}
           onChange={(event) => change({ category: event.target.value })} error={Boolean(errors.category)} helperText={errors.category} disabled={pending}>
-          {categories[draft.type].map((category) => <MenuItem key={category} value={category}>{category}</MenuItem>)}
+          {categories.filter((item) => item.type === draft.type).map((category) => <MenuItem key={category.id} value={category.name}>{category.name}</MenuItem>)}
         </TextField>
         <TextField id="transaction-date" required label="Дата" type="date" value={draft.date}
           slotProps={{ inputLabel: { shrink: true } }} onChange={(event) => change({ date: event.target.value })}

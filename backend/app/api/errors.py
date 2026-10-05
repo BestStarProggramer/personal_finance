@@ -1,6 +1,13 @@
 from fastapi import Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError, OperationalError
+
+
+def validation_error_handler(request: Request, error: RequestValidationError) -> JSONResponse:
+    # Do not echo input values: validation errors may contain passwords.
+    details = [{"loc": problem["loc"], "msg": problem["msg"], "type": problem["type"]} for problem in error.errors()]
+    return JSONResponse(status_code=422, content={"detail": details})
 
 
 def integrity_error_handler(request: Request, error: IntegrityError) -> JSONResponse:

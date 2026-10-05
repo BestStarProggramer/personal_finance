@@ -15,17 +15,17 @@ export default function BudgetsPage() {
     <Stack spacing={3}>
       <Box><Typography variant="h1">Бюджеты</Typography><Typography color="text.secondary">Месячные лимиты расходов по категориям</Typography></Box>
       <AsyncContent state={state} onRetry={retry}>
-        {({ transactions, budgets }) => <>
-          <BudgetEditor month={month} onMonthChange={setMonth} onSave={saveBudget} />
+        {({ transactions, budgets, categories }) => <>
+          <BudgetEditor categories={categories.filter((item) => item.type === 'expense').map((item) => item.name)} month={month} onMonthChange={setMonth} onSave={saveBudget} />
           {isValidMonth(month) && <>
             {!Object.keys(budgets[month] ?? {}).length && <EmptyState title="Бюджеты на этот месяц не заданы" description="Выберите категорию и сохраните лимит в форме выше. Расходы уже учитываются в карточках." />}
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' }, gap: 2 }}>
-              {summarizeMonth(transactions, month).byCategory.map(({ category, amount }) => (
+              {summarizeMonth(transactions, month, categories.filter((item) => item.type === 'expense').map((item) => item.name)).byCategory.map(({ category, amount }) => (
                 <BudgetCard key={category} category={category} spent={amount} limit={budgets[month]?.[category]} />
               ))}
             </Box>
           </>}
-          <Typography variant="body2" color="text.secondary">Лимиты и операции сохраняются до обновления страницы.</Typography>
+          <Typography variant="body2" color="text.secondary">Лимиты и операции сохраняются в вашем аккаунте.</Typography>
         </>}
       </AsyncContent>
     </Stack>

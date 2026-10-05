@@ -4,6 +4,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import CurrentUser
 from app.db.session import get_session
 from app.schemas.budgets import BudgetMonth, BudgetRead, BudgetWrite
 from app.services import budgets
@@ -16,30 +17,31 @@ DatabaseSession = Annotated[Session, Depends(get_session)]
 @router.get("", response_model=list[BudgetRead])
 def list_budgets(
     session: DatabaseSession,
+    user: CurrentUser,
     category_id: UUID | None = None,
     month: Annotated[BudgetMonth | None, Query(description="Первое число месяца, например 2026-09-01")] = None,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ):
-    return budgets.list_budgets(session, category_id, month, limit, offset)
+    return budgets.list_budgets(session, user.id, category_id, month, limit, offset)
 
 
 @router.get("/{budget_id}", response_model=BudgetRead)
-def get_budget(budget_id: UUID, session: DatabaseSession):
-    return budgets.get_budget(session, budget_id)
+def get_budget(budget_id: UUID, session: DatabaseSession, user: CurrentUser):
+    return budgets.get_budget(session, budget_id, user.id)
 
 
 @router.post("", response_model=BudgetRead, status_code=201)
-def create_budget(data: BudgetWrite, session: DatabaseSession):
-    return budgets.create_budget(session, data)
+def create_budget(data: BudgetWrite, session: DatabaseSession, user: CurrentUser):
+    return budgets.create_budget(session, data, user.id)
 
 
 @router.put("/{budget_id}", response_model=BudgetRead)
-def update_budget(budget_id: UUID, data: BudgetWrite, session: DatabaseSession):
-    return budgets.update_budget(session, budget_id, data)
+def update_budget(budget_id: UUID, data: BudgetWrite, session: DatabaseSession, user: CurrentUser):
+    return budgets.update_budget(session, budget_id, data, user.id)
 
 
 @router.delete("/{budget_id}", status_code=204)
-def delete_budget(budget_id: UUID, session: DatabaseSession) -> Response:
-    budgets.delete_budget(session, budget_id)
+def delete_budget(budget_id: UUID, session: DatabaseSession, user: CurrentUser) -> Response:
+    budgets.delete_budget(session, budget_id, user.id)
     return Response(status_code=204)

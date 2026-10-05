@@ -1,7 +1,8 @@
 from alembic import context
 
 from app.db.session import get_database_url, get_engine
-from app.models.finance import Base
+from app.db.base import Base
+import app.models  # Register all models, including authentication.
 
 target_metadata = Base.metadata
 

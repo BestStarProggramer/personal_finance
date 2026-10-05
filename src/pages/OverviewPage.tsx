@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import { Alert, Box, Button, LinearProgress, Paper, Stack, TextField, Typography } from '@mui/material'
 import { formatDate, localDate } from '../shared/lib/date'
 import { formatMoney } from '../shared/lib/money'
-import type { Transaction } from '../entities/finance/model/types'
+import type { Category, Transaction } from '../entities/finance/model/types'
 import { summarizeMonth } from '../entities/finance/model/summary'
 import { useFinance } from '../entities/finance/model/use-finance'
 import AsyncContent from '../shared/ui/AsyncContent'
@@ -19,14 +19,14 @@ export default function OverviewPage() {
         <TextField id="overview-month" label="Месяц" type="month" value={month} slotProps={{ inputLabel: { shrink: true } }} onChange={(event) => { if (event.target.value) setMonth(event.target.value) }} />
       </Stack>
       <AsyncContent state={state} onRetry={retry}>
-        {({ transactions }) => <OverviewSummary transactions={transactions} month={month} />}
+        {({ transactions, categories }) => <OverviewSummary categories={categories} transactions={transactions} month={month} />}
       </AsyncContent>
     </Stack>
   )
 }
 
-function OverviewSummary({ transactions, month }: { transactions: Transaction[]; month: string }) {
-  const summary = summarizeMonth(transactions, month)
+function OverviewSummary({ transactions, month, categories }: { categories: Category[]; transactions: Transaction[]; month: string }) {
+  const summary = summarizeMonth(transactions, month, categories.filter((item) => item.type === 'expense').map((item) => item.name))
   return (
     <Stack spacing={3}>
       {!summary.records.length && <EmptyState title="Операций за этот месяц нет" description="Добавьте доход или расход, чтобы увидеть итоги и распределение расходов."

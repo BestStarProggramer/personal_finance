@@ -13,7 +13,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.db.session import get_engine
-from app.models import Budget, Category, Transaction
+from app.models import Budget, Category, Transaction, User, RefreshSession
 
 
 def expect_equal(actual, expected, message: str) -> None:
@@ -25,10 +25,11 @@ class Api:
     def __init__(self, port: int) -> None:
         self.base = f"http://127.0.0.1:{port}"
         self.opener = build_opener(ProxyHandler({}))
+        self.token = None
 
     def request(self, method: str, path: str, expected: int = 200, data: dict | None = None):
         body = None if data is None else json.dumps(data).encode("utf-8")
-        request = Request(self.base + path, data=body, method=method, headers={"Content-Type": "application/json"})
+        request = Request(self.base + path, data=body, method=method, headers={"Content-Type": "application/json", **({"Authorization": f"Bearer {self.token}"} if self.token else {})})
         try:
             response = self.opener.open(request, timeout=10)
         except HTTPError as error:
@@ -79,15 +80,19 @@ def running_server():
                 process.wait(timeout=5)
 
 
-def cleanup(names: tuple[str, str]) -> None:
+def cleanup(email: str) -> None:
     engine = get_engine()
     try:
         with engine.begin() as connection:
-            ids = list(connection.scalars(select(Category.id).where(Category.name.in_(names))))
+            user_ids = list(connection.scalars(select(User.id).where(User.email == email)))
+            ids = list(connection.scalars(select(Category.id).where(Category.owner_id.in_(user_ids))))
             if ids:
                 connection.execute(delete(Budget).where(Budget.category_id.in_(ids)))
                 connection.execute(delete(Transaction).where(Transaction.category_id.in_(ids)))
                 connection.execute(delete(Category).where(Category.id.in_(ids)))
+            if user_ids:
+                connection.execute(delete(RefreshSession).where(RefreshSession.user_id.in_(user_ids)))
+                connection.execute(delete(User).where(User.id.in_(user_ids)))
     finally:
         engine.dispose()
 
@@ -95,6 +100,7 @@ def cleanup(names: tuple[str, str]) -> None:
 def check_api() -> None:
     marker = uuid4().hex
     names = (f"Check-{marker}", f"Updated-{marker}")
+    email = f"check-{marker}@example.com"
     try:
         with running_server() as api:
             expect_equal(api.request("GET", "/api/health/db"), {"status": "ok"}, "Database health failed")
@@ -102,6 +108,9 @@ def check_api() -> None:
             for resource in ("categories", "transactions", "budgets"):
                 if f"/api/{resource}" not in schema["paths"]:
                     raise AssertionError(f"Missing route: {resource}")
+            registered = api.request("POST", "/api/auth/register", 201, {"email": email, "name": "API check", "password": "CheckPassword123"})
+            access = registered["access_token"]
+            api.token = access
             category = api.request("POST", "/api/categories", 201, {"name": names[0], "type": "expense"})
             category_id = category["id"]
             transaction_data = {"category_id": category_id, "amount_kopecks": 125050, "date": "2026-09-21", "comment": "Check"}
@@ -114,6 +123,7 @@ def check_api() -> None:
             print("PASS: creation, health, validation and linked category protection", flush=True)
 
         with running_server() as api:
+            api.token = access
             for resource, record in (("categories", category), ("transactions", transaction), ("budgets", budget)):
                 loaded = api.request("GET", f'/api/{resource}/{record["id"]}')
                 expect_equal(loaded, record, f"{resource}: data changed after restart")
@@ -128,6 +138,7 @@ def check_api() -> None:
             expect_equal(budget["limit_kopecks"], 600000, "Budget update failed")
 
         with running_server() as api:
+            api.token = access
             for resource, record in (("categories", category), ("transactions", transaction), ("budgets", budget)):
                 expect_equal(api.request("GET", f'/api/{resource}/{record["id"]}'), record, f"{resource}: update not persisted")
             expect_equal(api.request("GET", f"/api/transactions?category_id={category_id}"), [transaction], "Transaction filter failed")
@@ -138,7 +149,7 @@ def check_api() -> None:
                 api.request("GET", path, 404)
             print("PASS: updates survived restart; filters and deletion work", flush=True)
     finally:
-        cleanup(names)
+        cleanup(email)
         print("Temporary check records removed", flush=True)
 
 

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test } from './fixtures.js'
 import type { Page } from '@playwright/test'
 
 async function capture(page: Page, name: string) {
@@ -16,9 +16,9 @@ async function capture(page: Page, name: string) {
 test('загрузка, ошибка на всех экранах и повторная попытка', async ({ page }) => {
   let release!: () => void
   const gate = new Promise<void>((resolve) => { release = resolve })
-  await page.route('**/demo/finance.json', async (route) => {
+  await page.route('**/api/transactions**', async (route) => {
     await gate
-    await route.fulfill({ path: 'public/demo/finance.json', contentType: 'application/json' })
+    await route.continue()
   })
   try {
     await page.goto('/transactions')
@@ -34,8 +34,8 @@ test('загрузка, ошибка на всех экранах и повто�
   } finally { release() }
   await expect(page.getByRole('status')).toHaveText('Найдено: 6')
 
-  await page.unroute('**/demo/finance.json')
-  await page.route('**/demo/finance.json', (route) => route.abort('failed'))
+  await page.unroute('**/api/transactions**')
+  await page.route('**/api/transactions**', (route) => route.abort('failed'))
   await page.reload()
   await expect(page.getByText('Не удалось загрузить данные.', { exact: false })).toBeVisible()
   await capture(page, 'transactions-error')
@@ -48,7 +48,7 @@ test('загрузка, ошибка на всех экранах и повто�
   await page.getByRole('link', { name: 'Добавить операцию' }).click()
   await expect(page.getByRole('button', { name: 'Повторить загрузку' })).toBeVisible()
   await expect(page.getByLabel('Сумма, ₽')).toHaveCount(0)
-  await page.unroute('**/demo/finance.json')
+  await page.unroute('**/api/transactions**')
   await page.getByRole('button', { name: 'Повторить загрузку' }).click()
   await expect(page.getByLabel('Сумма, ₽')).toBeVisible()
   await page.getByRole('link', { name: 'Операции', exact: true }).click()
@@ -56,7 +56,8 @@ test('загрузка, ошибка на всех экранах и повто�
 })
 
 test('пустые данные всех экранов и добавление первой операции', async ({ page }) => {
-  await page.route('**/demo/finance.json', (route) => route.fulfill({ json: { transactions: [], budgets: [] } }))
+  await page.route('**/api/transactions**', (route) => route.request().method() === 'GET' ? route.fulfill({ json: [] }) : route.continue())
+  await page.route('**/api/budgets**', (route) => route.request().method() === 'GET' ? route.fulfill({ json: [] }) : route.continue())
   await page.goto('/transactions')
   await expect(page.getByText('Добавьте первую операцию', { exact: false })).toBeVisible()
   await capture(page, 'transactions-empty')
@@ -83,6 +84,12 @@ test('пустые данные всех экранов и добавление 
 })
 
 test('ошибки форм, смена типа операции, исправление и защита сохранения', async ({ page }) => {
+  let releaseTransaction!: () => void
+  let releaseBudget!: () => void
+  const transactionGate = new Promise<void>((resolve) => { releaseTransaction = resolve })
+  const budgetGate = new Promise<void>((resolve) => { releaseBudget = resolve })
+  await page.route('**/api/transactions', async (route) => { await transactionGate; await route.continue() })
+  await page.route('**/api/budgets', async (route) => { await budgetGate; await route.continue() })
   await page.goto('/transactions/new')
   await page.getByRole('combobox', { name: 'Категория', exact: true }).click()
   await page.getByRole('option', { name: 'Продукты', exact: true }).click()
@@ -105,6 +112,7 @@ test('ошибки форм, смена типа операции, исправ�
   await save.click()
   await expect(save).toBeDisabled()
   await expect(page.getByLabel('Сумма, ₽')).toBeDisabled()
+  releaseTransaction()
   await expect(page).toHaveURL(/\/transactions$/)
   await expect(page.getByText('Минимальная сумма')).toHaveCount(1)
   await expect(page.getByRole('status')).toHaveText('Найдено: 7')
@@ -120,6 +128,7 @@ test('ошибки форм, смена типа операции, исправ�
   await page.getByLabel('Лимит, ₽').fill('500')
   await page.getByRole('button', { name: 'Сохранить лимит' }).click()
   await expect(page.getByRole('button', { name: 'Сохранить лимит' })).toBeDisabled()
+  releaseBudget()
   await expect(page.getByText('Лимит сохранён.')).toBeVisible()
   await expect(page.getByRole('region', { name: 'Продукты', exact: true })).toContainText('Лимит: 500,00')
   await capture(page, 'budgets-saved')
@@ -129,7 +138,7 @@ test('ошибки форм, смена типа операции, исправ�
 })
 
 test('повреждённый JSON вызывает ошибку, reduced motion отключает переход', async ({ page }) => {
-  await page.route('**/demo/finance.json', (route) => route.fulfill({ json: { transactions: [{}], budgets: [] } }))
+  await page.route('**/api/transactions**', (route) => route.fulfill({ json: [{}] }))
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
   await expect(page.getByText('Не удалось загрузить данные.', { exact: false })).toBeVisible()

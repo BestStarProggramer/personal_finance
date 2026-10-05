@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.db.session import get_engine
-from app.models import Budget, Category, Transaction
+from app.models import Budget, Category, Transaction, User
 
 
 class DatabaseTests(unittest.TestCase):
@@ -18,7 +18,10 @@ class DatabaseTests(unittest.TestCase):
         self.addCleanup(self.outer.rollback)
         self.session = Session(self.connection, join_transaction_mode="create_savepoint")
         self.addCleanup(self.session.close)
-        self.category = Category(name=f"Test-{uuid4()}", type="expense")
+        self.user = User(email=f"db-{uuid4()}@example.com", name="Test", password_hash="!test")
+        self.session.add(self.user)
+        self.session.flush()
+        self.category = Category(owner_id=self.user.id, name=f"Test-{uuid4()}", type="expense")
         self.session.add(self.category)
         self.session.flush()
 
@@ -30,7 +33,7 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual(caught.exception.orig.sqlstate, sqlstate)
 
     def test_migration_and_read_write(self) -> None:
-        self.assertEqual(self.session.execute(text("SELECT version_num FROM alembic_version")).scalar_one(), "0001")
+        self.assertEqual(self.session.execute(text("SELECT version_num FROM alembic_version")).scalar_one(), "0002")
         self.assertTrue({"categories", "transactions", "budgets"} <= set(inspect(self.connection).get_table_names()))
         record = Transaction(category=self.category, amount_kopecks=125050, date=date(2026, 9, 20), comment="Round trip")
         budget = Budget(category=self.category, month=date(2026, 9, 1), limit_kopecks=400000)
@@ -57,9 +60,9 @@ class DatabaseTests(unittest.TestCase):
         self.assert_rejected(Transaction(category_id=uuid4(), amount_kopecks=100, date=date.today()), "23503")
 
     def test_category_constraints(self) -> None:
-        self.assert_rejected(Category(name="   ", type="expense"), "23514")
-        self.assert_rejected(Category(name="Invalid", type="other"), "23514")
-        self.assert_rejected(Category(name=self.category.name, type="expense"), "23505")
+        self.assert_rejected(Category(owner_id=self.user.id, name="   ", type="expense"), "23514")
+        self.assert_rejected(Category(owner_id=self.user.id, name="Invalid", type="other"), "23514")
+        self.assert_rejected(Category(owner_id=self.user.id, name=self.category.name, type="expense"), "23505")
 
     def test_budget_constraints(self) -> None:
         base = dict(category_id=self.category.id, month=date(2026, 9, 1), limit_kopecks=100)
@@ -69,7 +72,7 @@ class DatabaseTests(unittest.TestCase):
         self.assert_rejected(Budget(**{**base, "month": date(2026, 10, 2)}), "23514")
         for amount in [0, -1, 100000000000]:
             self.assert_rejected(Budget(**{**base, "month": date(2026, 10, 1), "limit_kopecks": amount}), "23514")
-        income = Category(name=f"Income-{uuid4()}", type="income")
+        income = Category(owner_id=self.user.id, name=f"Income-{uuid4()}", type="income")
         self.session.add(income)
         self.session.flush()
         self.assert_rejected(Budget(**{**base, "category_id": income.id}), "23503")
