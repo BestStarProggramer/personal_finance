@@ -105,7 +105,7 @@ test('ошибки форм, смена типа операции, исправ�
   for (const label of ['Сумма, ₽', 'Дата', 'Комментарий']) await expect(page.getByLabel(label, { exact: false })).toHaveAttribute('aria-invalid', 'true')
   await capture(page, 'new-transaction-errors')
   await page.getByLabel('Сумма, ₽').fill('0,01')
-  await page.getByRole('textbox', { name: 'Дата', exact: true }).fill('2026-10-02')
+  await page.getByRole('textbox', { name: 'Дата', exact: true }).fill('02.10.2026')
   await page.getByLabel('Комментарий').fill('Минимальная сумма')
   await page.getByRole('combobox', { name: 'Категория', exact: true }).click()
   await page.getByRole('option', { name: 'Зарплата', exact: true }).click()

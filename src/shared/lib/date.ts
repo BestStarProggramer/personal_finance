@@ -9,3 +9,10 @@ export function isValidDate(value: string): boolean {
 
 export const isValidMonth = (value: string): boolean => /^\d{4}-\d{2}$/.test(value) && isValidDate(`${value}-01`)
 export const formatDate = (date: string): string => date.split('-').reverse().join('.')
+
+export function parseDate(value: string): string | null {
+  const match = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(value.trim())
+  if (!match) return null
+  const isoDate = `${match[3]}-${match[2]}-${match[1]}`
+  return isValidDate(isoDate) ? isoDate : null
+}

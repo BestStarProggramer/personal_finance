@@ -11,7 +11,7 @@ import EmptyState from '../shared/ui/EmptyState'
 import DeleteButton from '../shared/ui/DeleteButton'
 import { formatMoney } from '../shared/lib/money'
 
-const emptyFilters: Filters = { month: '', date: '', type: '', category: '' }
+const emptyFilters: Filters = { month: '', date: '', dateFrom: '', dateTo: '', type: '', category: '' }
 
 export default function TransactionsPage() {
   const { state, retry, deleteTransaction } = useFinance()

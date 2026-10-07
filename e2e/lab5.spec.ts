@@ -44,7 +44,7 @@ test('CRUD операции пересчитывает обзор и бюдже�
   await expect(page.getByRole('region', { name: 'Транспорт', exact: true })).toContainText('Потрачено: 565,00')
   await expect(page.getByRole('region', { name: 'Продукты', exact: true })).toContainText(/Потрачено: 3\s?250,50/)
   await page.goto(editURL)
-  await page.getByLabel('Дата', { exact: false }).fill('2020-01-15')
+  await page.getByLabel('Дата', { exact: false }).fill('15.01.2020')
   await page.getByRole('button', { name: 'Сохранить изменения' }).click()
   await page.getByRole('link', { name: 'Обзор', exact: true }).click()
   await expect(page.getByTestId('expense-total')).toHaveText(/28\s?315,50/)
@@ -178,7 +178,7 @@ test('списки API загружаются полностью при коли
   }
   await page.goto('/transactions')
   await expect(page.getByRole('status')).toHaveText('Найдено: 107')
-  await page.getByLabel('Дата', { exact: true }).fill('2020-01-01')
+  await page.getByLabel('Дата', { exact: true }).fill('01.01.2020')
   await expect(page.getByRole('status')).toHaveText('Найдено: 101')
   await page.getByRole('link', { name: 'Обзор', exact: true }).click()
   await chooseMonth(page, '2020-01')

@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { Box, Button, IconButton, InputAdornment, Popover, Stack, TextField, Typography } from '@mui/material'
 import { isValidMonth, localDate } from '../lib/date'
 
@@ -7,13 +7,14 @@ type Props = {
   value: string
   onChange: (month: string) => void
   required?: boolean
+  clearable?: boolean
   disabled?: boolean
   error?: boolean
   helperText?: string
 }
 const months = Array.from({ length: 12 }, (_, index) => new Intl.DateTimeFormat('ru-RU', { month: 'long' }).format(new Date(2020, index, 1)))
 
-export default function MonthPicker({ id, value, onChange, required, disabled, error, helperText }: Props) {
+export default function MonthPicker({ id, value, onChange, required, clearable = required, disabled, error, helperText }: Props) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   const [year, setYear] = useState(new Date().getFullYear())
   const selected = isValidMonth(value) ? new Date(`${value}-01T12:00:00`) : null
@@ -56,7 +57,7 @@ export default function MonthPicker({ id, value, onChange, required, disabled, e
           })}
         </Box>
         <Button fullWidth sx={{ mt: 1 }} onClick={() => select(localDate().slice(0, 7))}>Текущий месяц</Button>
-        {required && <Button fullWidth onClick={() => select('')}>Очистить</Button>}
+        {clearable && <Button fullWidth onClick={() => select('')}>Очистить</Button>}
       </Box>
     </Popover>
   </>

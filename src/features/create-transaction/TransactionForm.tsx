@@ -9,6 +9,7 @@ import { useAsyncAction } from '../../shared/lib/use-async-action'
 import { validateTransaction } from './validation'
 import type { TransactionDraft } from './validation'
 import CategoryCreator from '../create-category/CategoryCreator'
+import DateFilter from '../../shared/ui/DateFilter'
 
 type Props = { categories: Category[]; initial?: NewTransaction; onSave: (transaction: NewTransaction) => Promise<void>; onSaved: () => void }
 
@@ -56,8 +57,8 @@ export default function TransactionForm({ categories, initial, onSave, onSaved }
           {categories.filter((item) => item.type === draft.type).map((category) => <MenuItem key={category.id} value={category.name}>{category.name}</MenuItem>)}
         </TextField>
         <CategoryCreator categories={categories} type={draft.type} disabled={pending} onCreated={(category) => change({ category })} />
-        <TextField id="transaction-date" required label="Дата" type="date" value={draft.date}
-          slotProps={{ inputLabel: { shrink: true } }} onChange={(event) => change({ date: event.target.value })}
+        <DateFilter id="transaction-date" required disabled={pending} value={draft.date}
+          onChange={(date) => change({ date })}
           error={Boolean(errors.date)} helperText={errors.date} />
         <TextField id="transaction-comment" label="Комментарий" multiline minRows={2} value={draft.comment}
           onChange={(event) => change({ comment: event.target.value })} error={Boolean(errors.comment)} helperText={errors.comment || 'Необязательно, до 200 символов.'} />
