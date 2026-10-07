@@ -1,9 +1,10 @@
 import { Box, Chip, Paper, Stack, Typography } from '@mui/material'
+import type { ReactNode } from 'react'
 import type { Transaction } from '../model/types'
 import { formatDate } from '../../../shared/lib/date'
 import { formatMoney } from '../../../shared/lib/money'
 
-export default function TransactionCard({ transaction }: { transaction: Transaction }) {
+export default function TransactionCard({ transaction, actions }: { transaction: Transaction; actions?: ReactNode }) {
   return (
     <Paper component="li" variant="outlined" sx={{ p: 2 }}>
       <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} sx={{ justifyContent: 'space-between' }}>
@@ -19,6 +20,7 @@ export default function TransactionCard({ transaction }: { transaction: Transact
           </Typography>
         </Stack>
       </Stack>
+      {actions && <Stack direction="row" sx={{ mt: 1, flexWrap: 'wrap', gap: 1 }}>{actions}</Stack>}
     </Paper>
   )
 }

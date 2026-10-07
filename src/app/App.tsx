@@ -10,6 +10,8 @@ import NotFoundPage from '../pages/NotFoundPage'
 import OverviewPage from '../pages/OverviewPage'
 import BudgetsPage from '../pages/BudgetsPage'
 import SettingsPage from '../pages/SettingsPage'
+import EditTransactionPage from '../pages/EditTransactionPage'
+import CategoriesPage from '../pages/CategoriesPage'
 import './app.css'
 
 export default function App() {
@@ -24,6 +26,8 @@ export default function App() {
               <Route index element={<OverviewPage />} />
               <Route path="transactions" element={<TransactionsPage />} />
               <Route path="transactions/new" element={<NewTransactionPage />} />
+              <Route path="transactions/:id/edit" element={<EditTransactionPage />} />
+              <Route path="categories" element={<CategoriesPage />} />
               <Route path="budgets" element={<BudgetsPage />} />
             </Route>
             <Route path="settings" element={<SettingsPage />} />

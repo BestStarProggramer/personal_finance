@@ -10,10 +10,12 @@ import { validateTransaction } from './validation'
 import type { TransactionDraft } from './validation'
 import CategoryCreator from '../create-category/CategoryCreator'
 
-type Props = { categories: Category[]; onSave: (transaction: NewTransaction) => Promise<void>; onSaved: () => void }
+type Props = { categories: Category[]; initial?: NewTransaction; onSave: (transaction: NewTransaction) => Promise<void>; onSaved: () => void }
 
-export default function TransactionForm({ categories, onSave, onSaved }: Props) {
-  const [draft, setDraft] = useState<TransactionDraft>(() => ({ type: 'expense', amount: '', category: '', date: localDate(), comment: '' }))
+export default function TransactionForm({ categories, initial, onSave, onSaved }: Props) {
+  const [draft, setDraft] = useState<TransactionDraft>(() => initial
+    ? { ...initial, amount: (initial.amountKopecks / 100).toFixed(2).replace('.', ',') }
+    : { type: 'expense', amount: '', category: '', date: localDate(), comment: '' })
   const [submitted, setSubmitted] = useState(false)
   const { pending, error, run, clearError } = useAsyncAction()
   const errors = submitted ? validateTransaction(draft, categories) : {}
@@ -60,7 +62,7 @@ export default function TransactionForm({ categories, onSave, onSaved }: Props) 
         <TextField id="transaction-comment" label="Комментарий" multiline minRows={2} value={draft.comment}
           onChange={(event) => change({ comment: event.target.value })} error={Boolean(errors.comment)} helperText={errors.comment || 'Необязательно, до 200 символов.'} />
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-          <Button type="submit" variant="contained" loading={pending}>Сохранить операцию</Button>
+          <Button type="submit" variant="contained" loading={pending}>{initial ? 'Сохранить изменения' : 'Сохранить операцию'}</Button>
           <Button component={Link} to="/transactions" variant="outlined" disabled={pending}>Отмена</Button>
         </Stack>
       </Stack>

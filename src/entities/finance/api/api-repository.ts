@@ -38,7 +38,7 @@ export class ApiFinanceRepository implements FinanceRepository {
       if (!category) throw new Error('Не найдена категория бюджета.')
       const month = budget.month.slice(0, 7)
       limits[month] ??= {}
-      limits[month][category.name] = budget.limit_kopecks
+      limits[month] = { ...limits[month], [category.name]: budget.limit_kopecks }
     }
     this.budgets = budgets
     this.data = { transactions: records, budgets: limits, categories }
@@ -54,13 +54,72 @@ export class ApiFinanceRepository implements FinanceRepository {
   }
 
   async addTransaction(transaction: NewTransaction): Promise<FinanceData> {
+    return this.writeTransaction(transaction)
+  }
+
+  async updateTransaction(id: string, transaction: NewTransaction): Promise<FinanceData> {
+    return this.writeTransaction(transaction, id)
+  }
+
+  private async writeTransaction(transaction: NewTransaction, id?: string): Promise<FinanceData> {
     const category = this.data?.categories.find((item) => item.type === transaction.type && item.name === transaction.category)
     if (!this.data || !category) throw new Error('Выберите доступную категорию операции.')
-    const record = await apiClient.request<ApiTransaction>('/transactions', { method: 'POST', json: {
+    const record = await apiClient.request<ApiTransaction>(id ? `/transactions/${id}` : '/transactions', { method: id ? 'PUT' : 'POST', json: {
       category_id: category.id, amount_kopecks: transaction.amountKopecks, date: transaction.date, comment: transaction.comment,
     } })
+    const savedCategory = this.data.categories.find((item) => item.id === record.category_id)
+    if (!savedCategory) throw new Error('Обновите данные: категория операции изменилась.')
+    const saved = { id: record.id, type: savedCategory.type, category: savedCategory.name, amountKopecks: record.amount_kopecks, date: record.date, comment: record.comment }
     this.revision++
-    this.data = { ...this.data, transactions: [{ ...transaction, id: record.id }, ...this.data.transactions] }
+    this.data = { ...this.data, transactions: id
+      ? this.data.transactions.map((item) => item.id === id ? saved : item)
+      : [saved, ...this.data.transactions] }
+    return this.data
+  }
+
+  async deleteTransaction(id: string): Promise<FinanceData> {
+    if (!this.data) throw new Error('Дождитесь загрузки данных.')
+    await apiClient.request(`/transactions/${id}`, { method: 'DELETE' })
+    this.revision++
+    this.data = { ...this.data, transactions: this.data.transactions.filter((item) => item.id !== id) }
+    return this.data
+  }
+
+  async updateCategory(id: string, input: Omit<Category, 'id'>): Promise<FinanceData> {
+    const previous = this.data?.categories.find((item) => item.id === id)
+    if (!this.data || !previous) throw new Error('Категория не найдена. Обновите данные.')
+    const category = await apiClient.request<Category>(`/categories/${id}`, { method: 'PUT', json: input })
+    this.revision++
+    this.data = {
+      ...this.data,
+      categories: this.data.categories.map((item) => item.id === id ? category : item),
+      transactions: this.data.transactions.map((item) => item.type === previous.type && item.category === previous.name
+        ? { ...item, category: category.name, type: category.type } : item),
+      budgets: Object.fromEntries(Object.entries(this.data.budgets).map(([month, limits]) => [month,
+        Object.fromEntries(Object.entries(limits).map(([name, amount]) => [previous.type === 'expense' && name === previous.name ? category.name : name, amount])),
+      ])),
+    }
+    return this.data
+  }
+
+  async deleteCategory(id: string): Promise<FinanceData> {
+    if (!this.data) throw new Error('Дождитесь загрузки данных.')
+    await apiClient.request(`/categories/${id}`, { method: 'DELETE' })
+    this.revision++
+    this.data = { ...this.data, categories: this.data.categories.filter((item) => item.id !== id) }
+    return this.data
+  }
+
+  async deleteBudget(month: string, name: string): Promise<FinanceData> {
+    const category = this.data?.categories.find((item) => item.type === 'expense' && item.name === name)
+    const budget = this.budgets.find((item) => item.category_id === category?.id && item.month === `${month}-01`)
+    if (!this.data || !budget) throw new Error('Лимит не найден. Обновите данные.')
+    await apiClient.request(`/budgets/${budget.id}`, { method: 'DELETE' })
+    this.revision++
+    this.budgets = this.budgets.filter((item) => item.id !== budget.id)
+    this.data = { ...this.data, budgets: { ...this.data.budgets,
+      [month]: Object.fromEntries(Object.entries(this.data.budgets[month] ?? {}).filter(([key]) => key !== name)),
+    } }
     return this.data
   }
 

@@ -7,6 +7,11 @@ export type FinanceContextValue = {
   retry: () => void
   addTransaction: (transaction: NewTransaction) => Promise<void>
   addCategory: (category: Omit<Category, 'id'>) => Promise<void>
+  updateTransaction: (id: string, transaction: NewTransaction) => Promise<void>
+  deleteTransaction: (id: string) => Promise<void>
+  updateCategory: (id: string, category: Omit<Category, 'id'>) => Promise<void>
+  deleteCategory: (id: string) => Promise<void>
+  deleteBudget: (month: string, category: string) => Promise<void>
   saveBudget: (budget: BudgetInput) => Promise<void>
 }
 

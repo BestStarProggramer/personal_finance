@@ -107,6 +107,9 @@ test('второй пользователь не видит и не изменя
   await page.goto('/transactions')
   await expect(page.getByRole('status')).toHaveText('Найдено: 0')
   await expect(page.getByText('Только первый аккаунт')).toHaveCount(0)
+  await page.goto(`/transactions/${tx.id}/edit`)
+  await expect(page.getByRole('heading', { name: 'Операция недоступна' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Сохранить изменения' })).toHaveCount(0)
 })
 
 test('ошибка проверки сессии позволяет повторить запрос', async ({ page }) => {

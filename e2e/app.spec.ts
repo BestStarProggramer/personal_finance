@@ -73,7 +73,7 @@ test('все экраны без переполнения на телефоне 
   const errors: string[] = []
   page.on('pageerror', (error) => errors.push(error.message))
   await mkdir('docs/screenshots', { recursive: true })
-  const screens = [ ['/', 'overview', 'Обзор'], ['/transactions', 'transactions', 'Операции'], ['/transactions/new', 'new-transaction', 'Новая операция'], ['/budgets', 'budgets', 'Бюджеты'], ['/settings', 'settings', 'Настройки'], ['/missing', 'not-found', 'Страница не найдена'] ]
+  const screens = [ ['/', 'overview', 'Обзор'], ['/transactions', 'transactions', 'Операции'], ['/transactions/new', 'new-transaction', 'Новая операция'], ['/budgets', 'budgets', 'Бюджеты'], ['/categories', 'categories', 'Категории'], ['/settings', 'settings', 'Настройки'], ['/missing', 'not-found', 'Страница не найдена'] ]
   for (const width of [1440, 320]) {
     await page.setViewportSize({ width, height: width === 320 ? 800 : 1000 })
     for (const [path, name, title] of screens) {

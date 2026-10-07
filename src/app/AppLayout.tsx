@@ -8,6 +8,7 @@ const navigation = [
   { to: '/', label: 'Обзор' },
   { to: '/transactions', label: 'Операции' },
   { to: '/budgets', label: 'Бюджеты' },
+  { to: '/categories', label: 'Категории' },
   { to: '/settings', label: 'Настройки' },
 ]
 

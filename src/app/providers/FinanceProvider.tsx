@@ -46,5 +46,26 @@ export default function FinanceProvider({ children }: { children: ReactNode }) {
     setState({ status: 'ready', data })
   }
 
-  return <FinanceContext value={{ state, retry, addTransaction, addCategory, saveBudget }}>{children}</FinanceContext>
+  async function updateTransaction(id: string, transaction: NewTransaction): Promise<void> {
+    setState({ status: 'ready', data: await repository.updateTransaction(id, transaction) })
+  }
+
+  async function deleteTransaction(id: string): Promise<void> {
+    setState({ status: 'ready', data: await repository.deleteTransaction(id) })
+  }
+
+  async function updateCategory(id: string, category: Omit<Category, 'id'>): Promise<void> {
+    setState({ status: 'ready', data: await repository.updateCategory(id, category) })
+  }
+
+  async function deleteCategory(id: string): Promise<void> {
+    setState({ status: 'ready', data: await repository.deleteCategory(id) })
+  }
+
+  async function deleteBudget(month: string, category: string): Promise<void> {
+    setState({ status: 'ready', data: await repository.deleteBudget(month, category) })
+  }
+
+  return <FinanceContext value={{ state, retry, addTransaction, addCategory, saveBudget,
+    updateTransaction, deleteTransaction, updateCategory, deleteCategory, deleteBudget }}>{children}</FinanceContext>
 }

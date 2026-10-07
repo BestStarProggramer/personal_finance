@@ -25,7 +25,7 @@ test('загрузка, ошибка на всех экранах и повто�
     await page.goto('/transactions')
     await expect(page.getByRole('status', { name: 'Загрузка данных' })).toHaveAttribute('aria-busy', 'true')
     await capture(page, 'transactions-loading')
-    for (const label of ['Обзор', 'Бюджеты', 'Операции']) {
+    for (const label of ['Обзор', 'Бюджеты', 'Категории', 'Операции']) {
       await page.getByRole('link', { name: label, exact: true }).click()
       await expect(page.getByRole('status', { name: 'Загрузка данных' })).toBeVisible()
     }
@@ -40,7 +40,7 @@ test('загрузка, ошибка на всех экранах и повто�
   await page.reload()
   await expect(page.getByText('Не удалось загрузить данные.', { exact: false })).toBeVisible()
   await capture(page, 'transactions-error')
-  for (const [label, title] of [['Обзор', 'Обзор'], ['Бюджеты', 'Бюджеты']]) {
+  for (const [label, title] of [['Обзор', 'Обзор'], ['Бюджеты', 'Бюджеты'], ['Категории', 'Категории']]) {
     await page.getByRole('link', { name: label, exact: true }).click()
     await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Повторить загрузку' })).toBeVisible()
